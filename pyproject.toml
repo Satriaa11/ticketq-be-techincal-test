@@ -9,4 +9,7 @@ dependencies = [
     "flask-jwt-extended>=4.7.1",
     "flask-migrate>=4.1.0",
     "flask-sqlalchemy>=3.1.1",
+    "pydantic[email]>=2.11.7",
+    "python-dotenv>=1.1.1",
+    "requests>=2.32.4",
 ]
