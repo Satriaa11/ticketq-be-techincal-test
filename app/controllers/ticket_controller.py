@@ -1,193 +1,170 @@
 from flask import request, jsonify
 from pydantic import ValidationError
 from app.services.ticket_service import TicketService
-from app.utils.auth import token_required, admin_required, optional_auth
-from app.schemas.ticket_schemas import (
-    TicketCreateSchema,
-    TicketUpdateSchema,
-    TicketResponseSchema,
-    TicketListResponseSchema,
-    ErrorResponseSchema
-)
-import math
+from app.schemas.ticket_schemas import TicketCreateSchema, TicketUpdateSchema
 
 
 class TicketController:
-    """Controller for ticket endpoints"""
+    """Controller for ticket operations - Pure business logic"""
 
     @staticmethod
-    @token_required
-    def create_ticket(current_user):
-        """POST /tickets - Create a new ticket (Authentication required)"""
+    def get_all_tickets():
+        """Get all tickets with pagination"""
         try:
-            # Validate request data
-            ticket_data = TicketCreateSchema(**request.get_json())
+            page = request.args.get('page', 1, type=int)
+            per_page = request.args.get('per_page', 10, type=int)
 
-            # Create ticket with user info
-            new_ticket = TicketService.create_ticket(ticket_data, current_user.id)
+            tickets_pagination = TicketService.get_all_tickets(page=page, per_page=per_page)
 
-            # Return response
-            response_data = TicketResponseSchema.model_validate(new_ticket)
-            return jsonify(response_data.model_dump()), 201
+            return jsonify({
+                'tickets': [ticket.to_dict() for ticket in tickets_pagination.items],
+                'pagination': {
+                    'page': tickets_pagination.page,
+                    'pages': tickets_pagination.pages,
+                    'per_page': tickets_pagination.per_page,
+                    'total': tickets_pagination.total,
+                    'has_next': tickets_pagination.has_next,
+                    'has_prev': tickets_pagination.has_prev
+                }
+            }), 200
+
+        except Exception as e:
+            return jsonify({
+                'error': 'Internal Server Error',
+                'message': str(e)
+            }), 500
+
+    @staticmethod
+    def get_ticket_by_id(ticket_id):
+        """Get a specific ticket by ID"""
+        try:
+            ticket = TicketService.get_ticket_by_id(ticket_id)
+            if not ticket:
+                return jsonify({
+                    'error': 'Not Found',
+                    'message': 'Ticket not found'
+                }), 404
+
+            return jsonify(ticket.to_dict()), 200
+
+        except Exception as e:
+            return jsonify({
+                'error': 'Internal Server Error',
+                'message': str(e)
+            }), 500
+
+    @staticmethod
+    def create_ticket():
+        """Create a new ticket"""
+        try:
+            data = request.get_json()
+            if not data:
+                return jsonify({
+                    'error': 'Bad Request',
+                    'message': 'No JSON data provided'
+                }), 400
+
+            # Validate input using Pydantic
+            ticket_data = TicketCreateSchema(**data)
+
+            # Create ticket
+            ticket = TicketService.create_ticket(ticket_data.model_dump())
+
+            return jsonify({
+                'message': 'Ticket created successfully',
+                'ticket': ticket.to_dict()
+            }), 201
 
         except ValidationError as e:
-            error_response = ErrorResponseSchema(
-                error="Validation Error",
-                message="Invalid input data",
-                status_code=400,
-                details=e.errors()
-            )
-            return jsonify(error_response.model_dump()), 400
+            # Convert Pydantic errors to JSON-serializable format
+            error_details = []
+            for error in e.errors():
+                error_details.append({
+                    'field': error.get('loc', ['unknown'])[0] if error.get('loc') else 'unknown',
+                    'message': error.get('msg', 'Validation error'),
+                    'type': error.get('type', 'validation_error'),
+                    'input': str(error.get('input', ''))
+                })
+
+            return jsonify({
+                'error': 'Validation Error',
+                'message': 'Invalid input data',
+                'details': error_details
+            }), 400
 
         except Exception as e:
-            error_response = ErrorResponseSchema(
-                error="Internal Server Error",
-                message=str(e),
-                status_code=500
-            )
-            return jsonify(error_response.model_dump()), 500
+            return jsonify({
+                'error': 'Internal Server Error',
+                'message': str(e)
+            }), 500
 
     @staticmethod
-    @optional_auth
-    def get_all_tickets(current_user):
-        """GET /tickets - List all tickets (Optional authentication)"""
+    def update_ticket(ticket_id):
+        """Update ticket (mark as used/unused)"""
         try:
-            # Get pagination parameters
-            page = request.args.get('page', 1, type=int)
-            per_page = min(request.args.get('per_page', 10, type=int), 100)  # Max 100 per page
+            data = request.get_json()
+            if not data:
+                return jsonify({
+                    'error': 'Bad Request',
+                    'message': 'No JSON data provided'
+                }), 400
 
-            # Get tickets based on user role
-            if current_user and current_user.is_admin():
-                # Admin can see all tickets
-                tickets, total = TicketService.get_all_tickets(page, per_page)
-            elif current_user:
-                # Regular users can see all tickets but with limited info
-                tickets, total = TicketService.get_all_tickets(page, per_page)
-            else:
-                # Anonymous users can see all tickets but with limited info
-                tickets, total = TicketService.get_all_tickets(page, per_page)
-
-            # Calculate total pages
-            total_pages = math.ceil(total / per_page)
-
-            # Convert to response schema
-            ticket_responses = [TicketResponseSchema.model_validate(ticket) for ticket in tickets]
-
-            response_data = TicketListResponseSchema(
-                tickets=ticket_responses,
-                total=total,
-                page=page,
-                per_page=per_page,
-                total_pages=total_pages
-            )
-
-            return jsonify(response_data.model_dump()), 200
-
-        except Exception as e:
-            error_response = ErrorResponseSchema(
-                error="Internal Server Error",
-                message=str(e),
-                status_code=500
-            )
-            return jsonify(error_response.model_dump()), 500
-
-    @staticmethod
-    @optional_auth
-    def get_ticket_by_id(current_user, ticket_id):
-        """GET /tickets/:id - View a specific ticket (Optional authentication)"""
-        try:
-            ticket = TicketService.get_ticket_by_id(ticket_id)
-
-            if not ticket:
-                error_response = ErrorResponseSchema(
-                    error="Not Found",
-                    message=f"Ticket with ID {ticket_id} not found",
-                    status_code=404
-                )
-                return jsonify(error_response.model_dump()), 404
-
-            response_data = TicketResponseSchema.model_validate(ticket)
-            return jsonify(response_data.model_dump()), 200
-
-        except Exception as e:
-            error_response = ErrorResponseSchema(
-                error="Internal Server Error",
-                message=str(e),
-                status_code=500
-            )
-            return jsonify(error_response.model_dump()), 500
-
-    @staticmethod
-    @token_required
-    def update_ticket_status(current_user, ticket_id):
-        """PATCH /tickets/:id - Mark a ticket as used (Authentication required)"""
-        try:
-            # Validate request data
-            update_data = TicketUpdateSchema(**request.get_json())
-
-            # Check permission: user can only update their own tickets, admin can update any
-            ticket = TicketService.get_ticket_by_id(ticket_id)
-            if not ticket:
-                error_response = ErrorResponseSchema(
-                    error="Not Found",
-                    message=f"Ticket with ID {ticket_id} not found",
-                    status_code=404
-                )
-                return jsonify(error_response.model_dump()), 404
-
-            # Permission check
-            if not current_user.is_admin() and ticket.created_by_id != current_user.id:
-                error_response = ErrorResponseSchema(
-                    error="Forbidden",
-                    message="You can only update your own tickets",
-                    status_code=403
-                )
-                return jsonify(error_response.model_dump()), 403
+            # Validate input using Pydantic
+            update_data = TicketUpdateSchema(**data)
 
             # Update ticket
-            updated_ticket = TicketService.update_ticket_status(ticket_id, update_data)
+            ticket = TicketService.mark_ticket_as_used(ticket_id, update_data.isUsed)
+            if not ticket:
+                return jsonify({
+                    'error': 'Not Found',
+                    'message': 'Ticket not found'
+                }), 404
 
-            response_data = TicketResponseSchema.model_validate(updated_ticket)
-            return jsonify(response_data.model_dump()), 200
+            return jsonify({
+                'message': 'Ticket updated successfully',
+                'ticket': ticket.to_dict()
+            }), 200
 
         except ValidationError as e:
-            error_response = ErrorResponseSchema(
-                error="Validation Error",
-                message="Invalid input data",
-                status_code=400,
-                details=e.errors()
-            )
-            return jsonify(error_response.model_dump()), 400
+            # Convert Pydantic errors to JSON-serializable format
+            error_details = []
+            for error in e.errors():
+                error_details.append({
+                    'field': error.get('loc', ['unknown'])[0] if error.get('loc') else 'unknown',
+                    'message': error.get('msg', 'Validation error'),
+                    'type': error.get('type', 'validation_error'),
+                    'input': str(error.get('input', ''))
+                })
+
+            return jsonify({
+                'error': 'Validation Error',
+                'message': 'Invalid input data',
+                'details': error_details
+            }), 400
 
         except Exception as e:
-            error_response = ErrorResponseSchema(
-                error="Internal Server Error",
-                message=str(e),
-                status_code=500
-            )
-            return jsonify(error_response.model_dump()), 500
+            return jsonify({
+                'error': 'Internal Server Error',
+                'message': str(e)
+            }), 500
 
     @staticmethod
-    @admin_required
-    def delete_ticket(current_user, ticket_id):
-        """DELETE /tickets/:id - Remove a ticket (Admin only)"""
+    def delete_ticket(ticket_id):
+        """Delete a ticket"""
         try:
-            deleted = TicketService.delete_ticket(ticket_id)
+            success = TicketService.delete_ticket(ticket_id)
+            if not success:
+                return jsonify({
+                    'error': 'Not Found',
+                    'message': 'Ticket not found'
+                }), 404
 
-            if not deleted:
-                error_response = ErrorResponseSchema(
-                    error="Not Found",
-                    message=f"Ticket with ID {ticket_id} not found",
-                    status_code=404
-                )
-                return jsonify(error_response.model_dump()), 404
-
-            return jsonify({"message": f"Ticket {ticket_id} deleted successfully"}), 200
+            return jsonify({
+                'message': 'Ticket deleted successfully'
+            }), 200
 
         except Exception as e:
-            error_response = ErrorResponseSchema(
-                error="Internal Server Error",
-                message=str(e),
-                status_code=500
-            )
-            return jsonify(error_response.model_dump()), 500
+            return jsonify({
+                'error': 'Internal Server Error',
+                'message': str(e)
+            }), 500
