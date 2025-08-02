@@ -27,7 +27,7 @@ def create_app(config_class=None):
             "version": "1.0.0",
             "contact": {
                 "name": "TicketQ API Support",
-                "email": "support@ticketq.com"
+                # "email": "support@ticketq.com"
             }
         },
         "basePath": "/",
@@ -81,7 +81,7 @@ def create_app(config_class=None):
             },
             'database': 'SQLite',
             'architecture': {
-                'pattern': 'Clean Architecture',
+                # 'pattern': 'Clean Architecture',
                 'layers': ['Routes', 'Controllers', 'Services', 'Models'],
                 'documentation': 'External YAML files'
             },
@@ -99,7 +99,7 @@ def create_app(config_class=None):
     def health():
         return jsonify({
             'status': 'healthy',
-            'timestamp': '2025-08-01T00:00:00Z'
+            # 'timestamp': '2025-08-01T00:00:00Z'
         })
 
     # Error handlers
