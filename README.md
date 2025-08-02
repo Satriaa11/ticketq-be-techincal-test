@@ -84,15 +84,15 @@ A simple and clean REST API for managing event tickets built with Flask, SQLAlch
 
 ### Base URL: `http://localhost:5000`
 
-| Method   | Endpoint        | Description                 | Request Body                   |
-| -------- | --------------- | --------------------------- | ------------------------------ |
-| `GET`    | `/`             | Health check and API info   | -                              |
-| `GET`    | `/health`       | Simple health status        | -                              |
-| `GET`    | `/tickets`      | Get all tickets (paginated) | -                              |
-| `GET`    | `/tickets/{id}` | Get specific ticket         | -                              |
-| `POST`   | `/tickets`      | Create new ticket           | [TicketCreate](#ticket-schema) |
-| `PATCH`  | `/tickets/{id}` | Mark ticket as used/unused  | [TicketUpdate](#ticket-schema) |
-| `DELETE` | `/tickets/{id}` | Delete ticket               | -                              |
+| Method   | Endpoint        | Description                 |
+| -------- | --------------- | --------------------------- |
+| `GET`    | `/`             | Health check and API info   |
+| `GET`    | `/health`       | Simple health status        |
+| `GET`    | `/tickets`      | Get all tickets (paginated) |
+| `GET`    | `/tickets/{id}` | Get specific ticket         |
+| `POST`   | `/tickets`      | Create new ticket           |
+| `PATCH`  | `/tickets/{id}` | Mark ticket as used/unused  |
+| `DELETE` | `/tickets/{id}` | Delete ticket               |
 
 ### 📝 Ticket Schema
 
