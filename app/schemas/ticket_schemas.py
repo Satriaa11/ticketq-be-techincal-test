@@ -7,7 +7,7 @@ class TicketCreateSchema(BaseModel):
     """Schema for creating a new ticket"""
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    event_name: str = Field(
+    eventName: str = Field(
         ...,
         min_length=1,
         max_length=255,
@@ -24,7 +24,7 @@ class TicketCreateSchema(BaseModel):
         description="Event time in ISO format"
     )
 
-    @field_validator('event_name')
+    @field_validator('eventName')
     @classmethod
     def validate_event_name(cls, v):
         if not v or v.isspace():
@@ -50,7 +50,7 @@ class TicketUpdateSchema(BaseModel):
     """Schema for updating ticket status (mark as used)"""
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    is_used: bool = Field(
+    isUsed: bool = Field(
         ...,
         description="Mark ticket as used or unused"
     )
@@ -61,21 +61,21 @@ class TicketResponseSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    event_name: str
+    eventName: str
     location: str
-    time: datetime
-    is_used: bool
-    created_at: datetime
-    updated_at: datetime
+    time: str
+    isUsed: bool
+    createdAt: str
+    updatedAt: str
 
 
 class TicketListResponseSchema(BaseModel):
     """Schema for list of tickets response"""
     tickets: list[TicketResponseSchema]
     total: int
-    page: int
-    per_page: int
-    total_pages: int
+    page: Optional[int] = None
+    per_page: Optional[int] = None
+    total_pages: Optional[int] = None
 
 
 class ErrorResponseSchema(BaseModel):
