@@ -10,7 +10,7 @@ A simple and clean REST API for managing event tickets built with Flask, SQLAlch
 ## 🚀 Features
 
 - ✅ **RESTful API** - Complete CRUD operations for tickets
-- ✅ **Clean Architecture** - Separation of concerns with layered structure
+<!-- - ✅ **Clean Architecture** - Separation of concerns with layered structure -->
 - ✅ **Input Validation** - Pydantic v2 for robust data validation
 - ✅ **API Documentation** - Interactive Swagger UI documentation
 - ✅ **Database Support** - SQLite for development, PostgreSQL ready for production
@@ -84,16 +84,15 @@ A simple and clean REST API for managing event tickets built with Flask, SQLAlch
 
 ### Base URL: `http://localhost:5000`
 
-| Method   | Endpoint          | Description                 | Request Body                   |
-| -------- | ----------------- | --------------------------- | ------------------------------ |
-| `GET`    | `/`               | Health check and API info   | -                              |
-| `GET`    | `/health`         | Simple health status        | -                              |
-| `GET`    | `/tickets`        | Get all tickets (paginated) | -                              |
-| `GET`    | `/tickets/{id}`   | Get specific ticket         | -                              |
-| `POST`   | `/tickets`        | Create new ticket           | [TicketCreate](#ticket-schema) |
-| `PUT`    | `/tickets/{id}`   | Update existing ticket      | [TicketUpdate](#ticket-schema) |
-| `DELETE` | `/tickets/{id}`   | Delete ticket               | -                              |
-| `GET`    | `/tickets/health` | Tickets service health      | -                              |
+| Method   | Endpoint        | Description                 | Request Body                   |
+| -------- | --------------- | --------------------------- | ------------------------------ |
+| `GET`    | `/`             | Health check and API info   | -                              |
+| `GET`    | `/health`       | Simple health status        | -                              |
+| `GET`    | `/tickets`      | Get all tickets (paginated) | -                              |
+| `GET`    | `/tickets/{id}` | Get specific ticket         | -                              |
+| `POST`   | `/tickets`      | Create new ticket           | [TicketCreate](#ticket-schema) |
+| `PATCH`  | `/tickets/{id}` | Mark ticket as used/unused  | [TicketUpdate](#ticket-schema) |
+| `DELETE` | `/tickets/{id}` | Delete ticket               | -                              |
 
 ### 📝 Ticket Schema
 
@@ -204,7 +203,7 @@ API_VERSION=1.0.0
 
 Switch between configurations using the `ENV` environment variable.
 
-## 🗄️ Database Management
+<!-- ## 🗄️ Database Management
 
 ### Initialize Database
 
@@ -238,7 +237,7 @@ db.session.add(ticket)
 db.session.commit()
 print('Sample ticket added!')
 "
-```
+``` -->
 
 ### Migration Commands
 
@@ -265,7 +264,7 @@ uv run flask run --debug
 ENV=development uv run flask run
 ```
 
-### Code Style and Quality
+<!-- ### Code Style and Quality
 
 ```bash
 # Format code (if using black)
@@ -276,7 +275,7 @@ flake8 app/
 
 # Type checking (if using mypy)
 mypy app/
-```
+``` -->
 
 ### Development Tools
 
@@ -289,7 +288,7 @@ mypy app/
 
 ### Run Tests
 
-```bash
+<!-- ```bash
 # Run all tests
 ENV=testing uv run python -m pytest
 
@@ -298,7 +297,7 @@ ENV=testing uv run python -m pytest --cov=app
 
 # Run specific test file
 ENV=testing uv run python -m pytest tests/test_tickets.py
-```
+``` -->
 
 ### Test API Endpoints
 
