@@ -1,0 +1,54 @@
+tags:
+  - Tickets
+summary: Delete a ticket
+description: |
+  Permanently delete a ticket from the system.
+  This action cannot be undone, so use with caution.
+parameters:
+  - in: path
+    name: ticket_id
+    required: true
+    schema:
+      type: integer
+      minimum: 1
+    description: Unique identifier of the ticket to delete
+    example: 1
+responses:
+  200:
+    description: Ticket deleted successfully
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "Ticket deleted successfully"
+        example:
+          message: "Ticket deleted successfully"
+  404:
+    description: Resource not found
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Not Found"
+            message:
+              type: string
+              example: "Ticket not found"
+  500:
+    description: Internal server error
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Internal Server Error"
+            message:
+              type: string
+              example: "An unexpected error occurred"

@@ -1,0 +1,79 @@
+tags:
+  - Tickets
+summary: Get a specific ticket
+description: Retrieve detailed information about a specific ticket by its ID
+parameters:
+  - in: path
+    name: ticket_id
+    required: true
+    schema:
+      type: integer
+      minimum: 1
+    description: Unique identifier of the ticket
+    example: 1
+responses:
+  200:
+    description: Ticket found successfully
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            eventName:
+              type: string
+              example: "Rock Concert 2025"
+            location:
+              type: string
+              example: "Jakarta Convention Center"
+            time:
+              type: string
+              format: date-time
+              example: "2025-12-31T20:00:00"
+            isUsed:
+              type: boolean
+              example: false
+            createdAt:
+              type: string
+              format: date-time
+              example: "2025-08-01T12:00:00"
+            updatedAt:
+              type: string
+              format: date-time
+              example: "2025-08-01T12:00:00"
+        example:
+          id: 1
+          eventName: "Rock Concert 2025"
+          location: "Jakarta Convention Center"
+          time: "2025-12-31T20:00:00"
+          isUsed: false
+          createdAt: "2025-08-01T12:00:00"
+          updatedAt: "2025-08-01T12:00:00"
+  404:
+    description: Resource not found
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Not Found"
+            message:
+              type: string
+              example: "Ticket not found"
+  500:
+    description: Internal server error
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Internal Server Error"
+            message:
+              type: string
+              example: "An unexpected error occurred"

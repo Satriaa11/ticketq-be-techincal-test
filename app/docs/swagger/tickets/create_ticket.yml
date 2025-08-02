@@ -1,0 +1,126 @@
+tags:
+  - Tickets
+summary: Create a new ticket
+description: |
+  Create a new event ticket with the provided details.
+  All fields are required and will be validated.
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - eventName
+          - location
+          - time
+        properties:
+          eventName:
+            type: string
+            minLength: 1
+            maxLength: 255
+            example: "Rock Concert 2025"
+          location:
+            type: string
+            minLength: 1
+            maxLength: 255
+            example: "Jakarta Convention Center"
+          time:
+            type: string
+            format: date-time
+            example: "2025-12-31T20:00:00"
+      example:
+        eventName: "Rock Concert 2025"
+        location: "Jakarta Convention Center"
+        time: "2025-12-31T20:00:00"
+responses:
+  201:
+    description: Ticket created successfully
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "Ticket created successfully"
+            ticket:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  example: 1
+                eventName:
+                  type: string
+                  example: "Rock Concert 2025"
+                location:
+                  type: string
+                  example: "Jakarta Convention Center"
+                time:
+                  type: string
+                  format: date-time
+                  example: "2025-12-31T20:00:00"
+                isUsed:
+                  type: boolean
+                  example: false
+                createdAt:
+                  type: string
+                  format: date-time
+                  example: "2025-08-01T12:00:00"
+                updatedAt:
+                  type: string
+                  format: date-time
+                  example: "2025-08-01T12:00:00"
+        example:
+          message: "Ticket created successfully"
+          ticket:
+            id: 1
+            eventName: "Rock Concert 2025"
+            location: "Jakarta Convention Center"
+            time: "2025-12-31T20:00:00"
+            isUsed: false
+            createdAt: "2025-08-01T12:00:00"
+            updatedAt: "2025-08-01T12:00:00"
+  400:
+    description: Validation error
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Validation Error"
+            message:
+              type: string
+              example: "Invalid input data"
+            details:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                    example: "eventName"
+                  message:
+                    type: string
+                    example: "Event name is required"
+                  type:
+                    type: string
+                    example: "string_too_short"
+                  input:
+                    type: string
+                    example: ""
+  500:
+    description: Internal server error
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Internal Server Error"
+            message:
+              type: string
+              example: "An unexpected error occurred"
