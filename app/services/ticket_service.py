@@ -1,31 +1,21 @@
-from typing import Optional, List, Tuple
+from typing import List, Optional, Dict, Any
 from sqlalchemy.exc import SQLAlchemyError
 from app.models.ticket import Ticket
 from app.utils.extensions import db
-from app.schemas.ticket_schemas import TicketCreateSchema, TicketUpdateSchema
 
 
 class TicketService:
-    """Service layer for ticket operations"""
+    """Service class for ticket business logic"""
 
     @staticmethod
-    def create_ticket(ticket_data: TicketCreateSchema, created_by_id: int = None) -> Ticket:
-        """Create a new ticket"""
+    def get_all_tickets(page: int = 1, per_page: int = 10):
+        """Get all tickets with pagination"""
         try:
-            new_ticket = Ticket(
-                event_name=ticket_data.event_name,
-                location=ticket_data.location,
-                time=ticket_data.time,
-                created_by_id=created_by_id
+            return Ticket.query.order_by(Ticket.created_at.desc()).paginate(
+                page=page, per_page=per_page, error_out=False
             )
-
-            db.session.add(new_ticket)
-            db.session.commit()
-            return new_ticket
-
         except SQLAlchemyError as e:
-            db.session.rollback()
-            raise Exception(f"Failed to create ticket: {str(e)}")
+            raise Exception(f"Database error: {str(e)}")
 
     @staticmethod
     def get_ticket_by_id(ticket_id: int) -> Optional[Ticket]:
@@ -33,33 +23,35 @@ class TicketService:
         try:
             return Ticket.query.get(ticket_id)
         except SQLAlchemyError as e:
-            raise Exception(f"Failed to retrieve ticket: {str(e)}")
+            raise Exception(f"Database error: {str(e)}")
 
     @staticmethod
-    def get_all_tickets(page: int = 1, per_page: int = 10) -> Tuple[List[Ticket], int]:
-        """Get all tickets with pagination"""
+    def create_ticket(ticket_data: Dict[str, Any]) -> Ticket:
+        """Create a new ticket"""
         try:
-            pagination = Ticket.query.paginate(
-                page=page,
-                per_page=per_page,
-                error_out=False
+            ticket = Ticket(
+                event_name=ticket_data['eventName'],
+                location=ticket_data['location'],
+                time=ticket_data['time']
             )
-            return pagination.items, pagination.total
+            db.session.add(ticket)
+            db.session.commit()
+            return ticket
         except SQLAlchemyError as e:
-            raise Exception(f"Failed to retrieve tickets: {str(e)}")
+            db.session.rollback()
+            raise Exception(f"Failed to create ticket: {str(e)}")
 
     @staticmethod
-    def update_ticket_status(ticket_id: int, update_data: TicketUpdateSchema) -> Optional[Ticket]:
-        """Update ticket status (mark as used/unused)"""
+    def mark_ticket_as_used(ticket_id: int, is_used: bool) -> Optional[Ticket]:
+        """Mark a ticket as used or unused"""
         try:
             ticket = Ticket.query.get(ticket_id)
             if not ticket:
                 return None
 
-            ticket.is_used = update_data.is_used
+            ticket.is_used = is_used
             db.session.commit()
             return ticket
-
         except SQLAlchemyError as e:
             db.session.rollback()
             raise Exception(f"Failed to update ticket: {str(e)}")
@@ -75,7 +67,6 @@ class TicketService:
             db.session.delete(ticket)
             db.session.commit()
             return True
-
         except SQLAlchemyError as e:
             db.session.rollback()
             raise Exception(f"Failed to delete ticket: {str(e)}")
