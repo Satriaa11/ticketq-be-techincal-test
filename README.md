@@ -341,7 +341,7 @@ curl -X POST http://localhost:5000/tickets \
    uwsgi --http :5000 --module app:create_app()
    ```
 
-### Docker Deployment
+<!-- ### Docker Deployment
 
 ```dockerfile
 FROM python:3.11-slim
@@ -353,7 +353,7 @@ RUN pip install uv && uv sync --no-dev
 
 EXPOSE 5000
 CMD ["uv", "run", "gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:create_app()"]
-```
+``` -->
 
 ## 🤝 Contributing
 
