@@ -1,44 +1,39 @@
-from datetime import timedelta
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
 class Config:
+    """Base configuration class for TicketQ API"""
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///tickets.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    # JWT Configuration dengan algoritma HS256
-    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or 'jwt-secret-string-change-in-production'
-    JWT_ALGORITHM = 'HS256'  # Algoritma yang digunakan
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=15)  # Token pendek
-    JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)    # Refresh token lebih lama
+    # API Configuration
+    API_TITLE = os.environ.get('API_TITLE') or "TicketQ API"
+    API_VERSION = os.environ.get('API_VERSION') or "1.0.0"
+    API_DESCRIPTION = "Simple Ticket Management API"
 
-    # JWT Additional Settings
-    JWT_BLACKLIST_ENABLED = True
-    JWT_BLACKLIST_TOKEN_CHECKS = ['access', 'refresh']
-    JWT_ERROR_MESSAGE_KEY = 'message'
-
-    # JWT Header Configuration
-    JWT_HEADER_NAME = 'Authorization'
-    JWT_HEADER_TYPE = 'Bearer'
-
-    # JWT Claims
-    JWT_IDENTITY_CLAIM = 'sub'
-    JWT_USER_CLAIMS = 'user_claims'
+    # Environment
+    ENV = os.environ.get('ENV') or 'development'
 
 class DevelopmentConfig(Config):
-    DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///revobank_dev.db'
+    DEBUG = os.environ.get('FLASK_DEBUG', '1') == '1'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///tickets_dev.db'
 
 class TestingConfig(Config):
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///tickets_test.db'
 
 class ProductionConfig(Config):
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+
+    def __init__(self):
+        super().__init__()
+        database_url = os.environ.get('DATABASE_URL')
+        if not database_url:
+            raise ValueError("DATABASE_URL must be set in production")
+        self.SQLALCHEMY_DATABASE_URI = database_url
 
 config = {
     'development': DevelopmentConfig,
