@@ -23,6 +23,7 @@ instance/
 .env
 .env.local
 .env.production
+.migrations/
 
 # IDE
 .vscode/
