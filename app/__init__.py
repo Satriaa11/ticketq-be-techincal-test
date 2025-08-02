@@ -1,6 +1,7 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, testing
+from flasgger import Swagger
 from app.utils.extensions import db, migrate
-from app.config import Config
+from app.config import Config, DevelopmentConfig, TestingConfig
 
 
 def create_app(config_class=None):
@@ -17,17 +18,53 @@ def create_app(config_class=None):
     db.init_app(app)
     migrate.init_app(app, db)
 
+    # Initialize Swagger
+    swagger_template = {
+        "swagger": "2.0",
+        "info": {
+            "title": "TicketQ API",
+            "description": "Simple Ticket Management API",
+            "version": "1.0.0",
+            "contact": {
+                "name": "TicketQ API Support",
+                "email": "support@ticketq.com"
+            }
+        },
+        "basePath": "/",
+        "schemes": ["http"],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": [
+            {
+                "name": "Tickets",
+                "description": "Ticket management operations"
+            }
+        ]
+    }
+
+    swagger_config = {
+        "headers": [],
+        "specs": [
+            {
+                "endpoint": 'apispec_1',
+                "route": '/apispec_1.json',
+                "rule_filter": lambda rule: True,
+                "model_filter": lambda tag: True,
+            }
+        ],
+        "static_url_path": "/flasgger_static",
+        "swagger_ui": True,
+        "specs_route": "/apidocs/"
+    }
+
+    swagger = Swagger(app, config=swagger_config, template=swagger_template)
+
     # Import models to ensure they are registered with SQLAlchemy
-    from app.models import Ticket, User
+    from app.models import Ticket
 
     # Register blueprints
     from app.routes.ticket_routes import tickets_bp
-    from app.routes.auth_routes import auth_bp
-    from app.routes.user_routes import users_bp
-
     app.register_blueprint(tickets_bp)
-    app.register_blueprint(auth_bp)
-    app.register_blueprint(users_bp)
 
     # Health check endpoint
     @app.route('/')
@@ -36,45 +73,57 @@ def create_app(config_class=None):
             'status': 'OK',
             'message': 'TicketQ API is running',
             'version': '1.0.0',
+            'documentation': '/apidocs/',
             'endpoints': {
                 'tickets': '/tickets',
-                'auth': '/auth',
-                'users': '/users',
-                'health': '/health'
+                'tickets_health': '/tickets/health',
+                'health': '/',
+                'api_docs': '/apidocs/'
             },
-            'authentication': {
-                'register': 'POST /auth/register',
-                'login': 'POST /auth/login',
-                'refresh': 'POST /auth/refresh'
-            }
+            'database': 'SQLite',
+            'architecture': {
+                'pattern': 'Clean Architecture',
+                'layers': ['Routes', 'Controllers', 'Services', 'Models'],
+                'documentation': 'External YAML files'
+            },
+            'features': [
+                'RESTful API',
+                'Input validation with Pydantic v2',
+                'External Swagger documentation',
+                'Clean separation of concerns',
+                'Error handling (400, 404, 500)',
+                'SQLAlchemy ORM with pagination'
+            ]
         })
 
     @app.route('/health')
-    def api_health():
-        """API Health check"""
+    def health():
         return jsonify({
-            'status': 'OK',
-            'message': 'TicketQ API is running',
-            'version': '1.0.0'
+            'status': 'healthy',
+            'timestamp': '2025-08-01T00:00:00Z'
         })
 
     # Error handlers
     @app.errorhandler(404)
-    def not_found_error(error):
+    def not_found(error):
         return jsonify({
             'error': 'Not Found',
-            'message': 'The requested resource was not found',
-            'status_code': 404
+            'message': 'The requested resource was not found'
         }), 404
 
     @app.errorhandler(500)
     def internal_error(error):
-        db.session.rollback()
         return jsonify({
             'error': 'Internal Server Error',
-            'message': 'An unexpected error occurred',
-            'status_code': 500
+            'message': 'An internal error occurred'
         }), 500
+
+    @app.errorhandler(400)
+    def bad_request(error):
+        return jsonify({
+            'error': 'Bad Request',
+            'message': 'Invalid request data'
+        }), 400
 
     return app
 
