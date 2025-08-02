@@ -76,7 +76,6 @@ def create_app(config_class=None):
             'documentation': '/apidocs/',
             'endpoints': {
                 'tickets': '/tickets',
-                'tickets_health': '/tickets/health',
                 'health': '/',
                 'api_docs': '/apidocs/'
             },
