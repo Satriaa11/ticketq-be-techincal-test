@@ -6,9 +6,8 @@ parameters:
   - in: path
     name: ticket_id
     required: true
-    schema:
-      type: integer
-      minimum: 1
+    type: integer
+    minimum: 1
     description: Unique identifier of the ticket
     example: 1
 responses:

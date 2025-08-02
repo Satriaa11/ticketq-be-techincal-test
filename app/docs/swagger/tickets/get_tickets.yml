@@ -7,19 +7,17 @@ description: |
 parameters:
   - in: query
     name: page
-    schema:
-      type: integer
-      minimum: 1
-      default: 1
+    type: integer
+    minimum: 1
+    default: 1
     description: Page number for pagination
     example: 1
   - in: query
     name: per_page
-    schema:
-      type: integer
-      minimum: 1
-      maximum: 100
-      default: 10
+    type: integer
+    minimum: 1
+    maximum: 100
+    default: 10
     description: Number of tickets per page (max 100)
     example: 10
 responses:

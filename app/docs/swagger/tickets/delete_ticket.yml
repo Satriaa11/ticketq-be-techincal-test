@@ -8,9 +8,8 @@ parameters:
   - in: path
     name: ticket_id
     required: true
-    schema:
-      type: integer
-      minimum: 1
+    type: integer
+    minimum: 1
     description: Unique identifier of the ticket to delete
     example: 1
 responses:

@@ -8,121 +8,113 @@ parameters:
   - in: path
     name: ticket_id
     required: true
-    schema:
-      type: integer
-      minimum: 1
+    type: integer
+    minimum: 1
     description: Unique identifier of the ticket to update
     example: 1
-requestBody:
-  required: true
-  content:
-    application/json:
-      schema:
-        type: object
-        required:
-          - isUsed
-        properties:
-          isUsed:
-            type: boolean
-            example: true
-            description: Mark ticket as used (true) or unused (false)
+  - in: body
+    name: ticketUpdate
+    description: Ticket update object
+    required: true
+    schema:
+      type: object
+      required:
+        - isUsed
+      properties:
+        isUsed:
+          type: boolean
+          example: true
+          description: Mark ticket as used (true) or unused (false)
       example:
         isUsed: true
 responses:
   200:
     description: Ticket updated successfully
-    content:
-      application/json:
-        schema:
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Ticket updated successfully"
+        ticket:
           type: object
           properties:
-            message:
+            id:
+              type: integer
+              example: 1
+            eventName:
               type: string
-              example: "Ticket updated successfully"
-            ticket:
-              type: object
-              properties:
-                id:
-                  type: integer
-                  example: 1
-                eventName:
-                  type: string
-                  example: "Rock Concert 2025"
-                location:
-                  type: string
-                  example: "Jakarta Convention Center"
-                time:
-                  type: string
-                  format: date-time
-                  example: "2025-12-31T20:00:00"
-                isUsed:
-                  type: boolean
-                  example: true
-                createdAt:
-                  type: string
-                  format: date-time
-                  example: "2025-08-01T12:00:00"
-                updatedAt:
-                  type: string
-                  format: date-time
-                  example: "2025-08-01T12:30:00"
-        example:
-          message: "Ticket updated successfully"
-          ticket:
-            id: 1
-            eventName: "Rock Concert 2025"
-            location: "Jakarta Convention Center"
-            time: "2025-12-31T20:00:00"
-            isUsed: true
-            createdAt: "2025-08-01T12:00:00"
-            updatedAt: "2025-08-01T12:30:00"
+              example: "Rock Concert 2025"
+            location:
+              type: string
+              example: "Jakarta Convention Center"
+            time:
+              type: string
+              format: date-time
+              example: "2025-12-31T20:00:00"
+            isUsed:
+              type: boolean
+              example: true
+            createdAt:
+              type: string
+              format: date-time
+              example: "2025-08-01T12:00:00"
+            updatedAt:
+              type: string
+              format: date-time
+              example: "2025-08-01T12:30:00"
+    examples:
+      application/json:
+        message: "Ticket updated successfully"
+        ticket:
+          id: 1
+          eventName: "Rock Concert 2025"
+          location: "Jakarta Convention Center"
+          time: "2025-12-31T20:00:00"
+          isUsed: true
+          createdAt: "2025-08-01T12:00:00"
+          updatedAt: "2025-08-01T12:30:00"
   400:
     description: Validation error
-    content:
-      application/json:
-        schema:
-          type: object
-          properties:
-            error:
-              type: string
-              example: "Validation Error"
-            message:
-              type: string
-              example: "Invalid input data"
-            details:
-              type: array
-              items:
-                type: object
-                properties:
-                  field:
-                    type: string
-                    example: "isUsed"
-                  message:
-                    type: string
-                    example: "Field required"
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Validation Error"
+        message:
+          type: string
+          example: "Invalid input data"
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                example: "isUsed"
+              message:
+                type: string
+                example: "Field required"
   404:
     description: Resource not found
-    content:
-      application/json:
-        schema:
-          type: object
-          properties:
-            error:
-              type: string
-              example: "Not Found"
-            message:
-              type: string
-              example: "Ticket not found"
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Not Found"
+        message:
+          type: string
+          example: "Ticket not found"
   500:
     description: Internal server error
-    content:
-      application/json:
-        schema:
-          type: object
-          properties:
-            error:
-              type: string
-              example: "Internal Server Error"
-            message:
-              type: string
-              example: "An unexpected error occurred"
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Internal Server Error"
+        message:
+          type: string
+          example: "An unexpected error occurred"
